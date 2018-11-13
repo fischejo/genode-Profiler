@@ -60,5 +60,5 @@ sudo pip3 install matplotlib
 # Further documentation
 Further documentation is in directory `doc`.
 
-* [Function Profiler](./doc/profiler.md)
+* [Implementation](./doc/implementation.md)
 * [Summary Profiling Techniques](./doc/profiler_techniques.md)

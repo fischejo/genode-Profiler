@@ -4,17 +4,6 @@ This documentation introduces a software-based profiler with serial log
 communication. Further information about other profiling techniques are
 summarized in [profiler\_techniques.md](profiler_techniques.md)
 
-![Screenshot](plotted.png)
-
-# Requirements
-
-Pythons `matplotlib` is required.
-
-```bash
-sudo apt-get install python3-pip
-sudo pip3 install matplotlib
-```
-
 ## Time Source
 
 In order to measure elipsed time of a function, a source of time is
