@@ -1,0 +1,97 @@
+#!/usr/bin/env python3
+
+import matplotlib.pyplot as plot
+import sys
+import itertools
+import json
+import re
+from matplotlib.transforms import TransformedBbox, Bbox
+import collections
+
+
+def pretty_name(pretty):
+    fre = re.match(r'^(.*) (.*)\((.*)\)', pretty)
+    if fre:
+        return fre.group(2)
+    else:
+        return pretty
+
+def read_stat_file_color(path):
+    ps = collections.defaultdict(list)
+    with open(path) as f:
+        for line in f:
+            p_data = json.loads(line)
+            p_name = p_data['name']
+            p_start = p_data['start']
+            p_stop = p_data['stop']
+            p_color = p_data['color']
+            p_duration = max(p_stop - p_start, 0)
+            p_triplet = (p_start, p_duration, p_color)
+            ps[p_name].append(p_triplet)
+    return ps
+
+
+functions = read_stat_file_color(sys.argv[1])
+functions_sorted_by_start =  sorted(
+    functions.items(),
+    key=lambda kv: kv[1][0],
+    reverse=True)
+
+
+
+dpi = 100
+top_height = 10/dpi
+bottom_height = 50/dpi
+bar_height = 20
+fig_height = (bar_height*len(functions))/dpi + bottom_height + top_height
+fig_width = 20
+        
+fig = plot.figure(figsize=(20, fig_height))
+ax = plot.subplot()
+        
+ypos = 1
+
+for name, triplets in functions_sorted_by_start:
+    starts,durations,colors = zip(*triplets)
+    print(name, colors)
+    # create a bar for every name
+    ax.broken_barh(
+        list( zip(starts,durations)),
+        (ypos, 8),
+        facecolors=colors)
+    
+    # write longest duration of all function instances behind the last bar.
+    bar_last_end = 0
+    bar_max_duration = 0
+    for start,duration,color in triplets:
+        if start+duration > bar_last_end:
+            bar_last_end = start+duration
+        if duration > bar_max_duration:
+            bar_max_duration = duration
+
+    ax.text(bar_last_end+5, ypos+4, '{} us'.format(bar_max_duration),
+            horizontalalignment='left',
+            verticalalignment='center',
+            fontsize=8)
+    ypos += 10
+
+
+# create labels    
+ax.set_xlabel('microseconds (us) since start')
+
+
+names, triplets = zip(*functions_sorted_by_start)
+pretty_names = map(pretty_name, names)
+ax.set_yticks([k*10+5 for k in range(0,len(functions))])
+ax.set_yticklabels(pretty_names, fontsize=8)
+
+
+
+ax.grid(True)
+plot.subplots_adjust(left=0.3, right=0.95, top=1-top_height/fig_height, bottom=bottom_height/fig_height)
+
+if len(sys.argv) > 2:
+    plot.savefig(sys.argv[2], dpi=100)
+
+plot.show()    
+

@@ -1,0 +1,3 @@
+#/bin/bash
+grep -oP '(?<=\\STATS\\).*(?=\\STATE\\)' ${1:-/dev/stdin} > "${2:-/dev/stdout}"
+
