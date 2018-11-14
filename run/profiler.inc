@@ -3,7 +3,7 @@
   set log_file "$prefix.log"
   set tool_dir "${genode_dir}/../genode-Profiler/tool/"
   set stat_file "$prefix.stat"
-  set plot_file "$prefix.pdf"
+  set plot_file "$prefix.svg"
 
 
 proc profiler_enable_log {} {
@@ -19,7 +19,7 @@ proc profiler_postprocess {} {
   exec ${tool_dir}profiler-filter ${log_dir}${log_file} ${log_dir}${stat_file}
 
   # create plot from statistic data
-  exec ${tool_dir}profiler-plot ${log_dir}${stat_file} ${log_dir}${plot_file}     
+  exec ${tool_dir}profiler-plot --show --input ${log_dir}${stat_file} --output ${log_dir}${plot_file}
 }
 
 
