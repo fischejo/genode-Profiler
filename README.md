@@ -1,8 +1,8 @@
-# Serial Log Communication Profiler
+# Function Profiler based on Serial Log Output for Genode 
 
 ![Screenshot](doc/plotted.png)
 
-# OS Requirements
+## OS Requirements
 
 Pythons `matplotlib` is required.
 
@@ -11,7 +11,7 @@ sudo apt-get install python3-pip
 sudo pip3 install matplotlib
 ```
 
-# Application Integration
+## Application Integration
 
 1. Include `<util/profiler.h>` in your Application
 2. Create a Timer Session and make it available in every function which should
@@ -47,7 +47,7 @@ sudo pip3 install matplotlib
       file for profiling information and creates the plot afterwards.
 
 
-# Genode Integration
+## Genode Integration
 
 1. Clone this repository to the root directory of your Genode.
 
@@ -57,8 +57,15 @@ sudo pip3 install matplotlib
    ```
 
 
-# Further documentation
+## Further documentation
 Further documentation is in directory `doc`.
 
 * [Implementation](./doc/implementation.md)
 * [Summary Profiling Techniques](./doc/profiler_techniques.md)
+
+## Further Links
+
+* [CheckpointRestore-Statistics](https://github.com/pecheur/CheckpointRestore-Statistics)
+* [genode-CheckpointRestore-SharedMemory](https://github.com/pecheur/genode-CheckpointRestore-SharedMemory)
+
+
