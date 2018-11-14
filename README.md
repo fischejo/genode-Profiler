@@ -33,18 +33,11 @@ sudo pip3 install matplotlib
    ```
 
 5. (Optional) If you want to use automatic logging, filtering and plotting of
-   your profiling data whenever your application runs in Qemu, the run file
-   requires some adjustments.
-   1. Source the `profiler.inc` from `genode-Profiler`.
-	  ```
-	  source ${genode_dir}/../genode-Profiler/run/profiler.inc
-	  ```
-   2. Call `profiler_enable_log` before qemu is started. This enables logging
-      and prepares the necessary log directory.
-
-   3. After the execution of qemu with the `run_genode_until` function, add
-      `profiler_postprocess` to your run file. This function will filter the log
-      file for profiling information and creates the plot afterwards.
+   your profiling data whenever your application runs in Qemu, source
+   `profiler.inc`.
+   ```
+   source ${genode_dir}/../genode-Profiler/run/profiler.inc
+   ```
 
 
 ## Genode Integration
@@ -60,7 +53,7 @@ sudo pip3 install matplotlib
 ## Further documentation
 Further documentation is in directory `doc`.
 
-* [Implementation](./doc/implementation.md)
+* [Implementation](./doc/implementation.md) *deprecated*
 * [Summary Profiling Techniques](./doc/profiler_techniques.md)
 
 ## Further Links
