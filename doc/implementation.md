@@ -21,7 +21,7 @@ required. Following might be possible:
 
 ## Implementation
 
-## Creating profiler log
+### Creating profiler log
 
 The profiling functionality is implemented in class `Profiler`
 (`include/rtcr/util/profiler.h`). It depends on a Genode::Timer
@@ -42,7 +42,7 @@ and both timestamps are printed to the serial log:
 Every profile log starts with  `\STATS\` and ends with `\STATE\`. It includes a
 json string with following attributes: `name`, `start` and `stop`.
 
-## Extracing profiler log and plotting
+### Extracing profiler log and plotting
 
 The except script `run/profiler_rtcr_restore_child.run` is extended and calls
 `profiler-filter` and `profiler-plot` after a successful execution of
@@ -50,11 +50,5 @@ qemu. Both scripts are in `./tool/`.
 
 * **tool/profiler-filter** extracts profiler data from a log stream.
 * **tool/profiler-plot** is a python script and creates a plot from profiler data.
-
-Log files are exported to `${BUILD_DIR}/log/`. This directory contains:
-* `.log` raw log from serial output
-* `.stat` extracted profiler data from `.log`
-* `.png` plotted graph of profiled functions
-
 
 

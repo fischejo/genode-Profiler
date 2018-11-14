@@ -38,7 +38,10 @@ sudo pip3 install matplotlib
    ```
    source ${genode_dir}/../genode-Profiler/run/profiler.inc
    ```
-
+   After running the run file, a GUI with the plot graph opens. You can disable
+   this behaviour with `set profiler_show_plot false`.
+   The plot is automatically exported as `.svg`, `.png`, `.pdf`. All files are
+   in your build directory under `var/run/.../log/`.
 
 ## Genode Integration
 
