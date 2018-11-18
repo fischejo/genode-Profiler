@@ -1,9 +1,9 @@
 set run_dir [run_dir]
-set log_dir "$run_dir/log/"
+set log_dir "$run_dir/"
 set prefix [clock format [clock seconds] -format "%y-%m-%d-%H:%M:%S"]
 set log_file "$prefix.log"
 set tool_dir "${genode_dir}/../genode-Profiler/tool/"
-set stat_file "$prefix.stat"
+set stat_file "$prefix.profile"
 set profiler_show_plot true
 
 

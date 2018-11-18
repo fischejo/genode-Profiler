@@ -1,3 +1,6 @@
 #/bin/bash
-grep -oP '(?<=\\STATS\\).*(?=\\STATE\\)' ${1:-/dev/stdin} > "${2:-/dev/stdout}"
 
+output=$(grep -oP '(?<=\\STATS\\).*(?=\\STATE\\)' ${1:-/dev/stdin} | sed 's/$/,/')
+echo "[" >> "${2:-/dev/stdout}"
+echo $output | rev | cut -c 2- | rev  >> "${2:-/dev/stdout}"
+echo "]" >> "${2:-/dev/stdout}"
