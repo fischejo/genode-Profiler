@@ -1,0 +1,31 @@
+#!/usr/bin/env python3
+
+import argparse
+from profilerlib import Profile
+
+# parse arguments
+parser = argparse.ArgumentParser(prog="profiler-merge")
+parser.add_argument("-o", "--output", required=True, #nargs='*',
+                    help="Save plot to file.")
+parser.add_argument("inputs",nargs='+',
+                    help="Input file which should be merged.")
+parser.add_argument("--ignore-scope-disparity", action='store_true',
+                    help="Ignore missing scopes in profiles.")
+parser.add_argument("--ignore-color-disparity",action='store_true',
+                    help="Ignore different colors for instances.")
+args = parser.parse_args()
+
+# load profiles from inputs
+profiles = []
+for path in args.inputs:
+    profile = Profile()
+    profile.load(path)
+    profiles.append(profile)
+
+# merge profiles
+merged_profile = Profile.mean(profiles,
+                               args.ignore_scope_disparity,
+                               args.ignore_color_disparity)
+
+# save merged profile to file
+merged_profile.save(args.output)

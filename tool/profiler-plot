@@ -3,175 +3,90 @@
 import matplotlib.pyplot as plot
 import sys
 import itertools
-import json
-import re
 from matplotlib.transforms import TransformedBbox, Bbox
 import collections
 import argparse
+from profilerlib import Profile, Scope, Instance
+
+dpi=100
+
+parser = argparse.ArgumentParser(prog="profiler-plot")
+parser.add_argument("-s", "--show", action='store_true',
+                    help="Show Plot in a GUI.")
+parser.add_argument("-o", "--output", action='append', #nargs='*',
+                    help="Save plot to file. The file ending determinates the file type")
+parser.add_argument("-i", "--input", required=True,
+                    help="Input is a state file for plotting")
+args = parser.parse_args()
+
+profile = Profile()
+profile.load(args.input)
+sorted_scopes = profile.getsorted()
 
 
-"""Extracts the function name from C++'s __PRETTY_FUNTION__
+# top border above the plot
+border_top_height = 10/dpi
 
-:param pretty str: __PRETTY_FUCTION__ formatted string
-:return: returns functions name
-:rtype: str
+# bottom border below the plot
+border_bottom_height = 50/dpi
 
-"""    
-def pretty_name(pretty):
-    fre = re.match(r'^(.*) (.*)\((.*)\)', pretty)
-    if fre:
-        return fre.group(2)
-    else:
-        return pretty
+# the plot is split in rows. Every function is plotted in a seperate row. A
+# duration bar is drawn for every function call.
+# row: function name
+# bar: function call
+plot_row_height = 20/dpi
+plot_height = plot_row_height*len(sorted_scopes)
 
+# the total size of the figure, including borders and plot.
+fig_height = plot_height + border_bottom_height + border_top_height
+fig_width = 20
 
-
-"""Read a state file and returns a dictionary of functions.
-
-:param path str: Path to the stat file.
-:return: returns a dictionary of functions.
-:rtype: { FUNCTION_NAME: [{"start": int, "duration": int, "color" str}], ... }
-
-"""
-def read_stat_file(path):
-    ps = collections.defaultdict(list)
-    with open(path) as f:
-        for line in f:
-            p_data = json.loads(line)
-            p_name = p_data['name']
-            p_start = p_data['start']
-            p_stop = p_data['stop']
-            p_color = p_data['color']
-            p_duration = max(p_stop - p_start, 0)
-            p_triplet = (p_start, p_duration, p_color)
-            ps[p_name].append(p_triplet)
-    return ps
-
-
-"""merge two lists of functions and add bars which visualize improvements in execution time.
-
-TODO: This function is not implemented yet.
-
-:param functions dict: function dictionary
-:param diff_functions dict: second function dictionary
-:return: returns a merged function dictionary
-:rtype: { FUNCTION_NAME: [{"start": int, "duration": int, "color" str}], ... }
-
-"""
-def merge_functions(functions, diff_functions):
-    return functions
-
-
-def plot_functions(functions, dpi=100):
-    # top border above the plot
-    border_top_height = 10/dpi
-
-    # bottom border below the plot
-    border_bottom_height = 50/dpi
-
-    # the plot is split in rows. Every function is plotted in a seperate row. A
-    # duration bar is drawn for every function call.
-    # row: function name
-    # bar: function call
-    plot_row_height = 20/dpi
-    plot_height = plot_row_height*len(functions)
-
-    # the total size of the figure, including borders and plot.
-    fig_height = plot_height + border_bottom_height + border_top_height
-    fig_width = 20
-
-    # create a new matplotlib figure
-    fig = plot.figure(figsize=(20, fig_height), dpi=dpi)
-    ax = plot.subplot()
+# create a new matplotlib figure
+fig = plot.figure(figsize=(20, fig_height), dpi=dpi)
+ax = plot.subplot()
     
-    # sort the dictionary of functions according to there start time.
-    functions_sorted_by_start = sorted(functions.items(), key=lambda kv:
-                                       kv[1][0], reverse=True)
+
+# The row is a little bit bigger than the bars which are inside. There is a
+# horizontal space of 2 between every bar. The text is drawn behind the last
+# bar with a padding of 5.
+row_y_position = 0
+row_height = 10
+bar_height = 8
+text_space = 5
+# iterate over all functions and draw their bars.
+#for name, triplets in functions_sorted_by_start:
+for scope in sorted_scopes:  
+    bar_y_position = row_y_position+(row_height-bar_height)/2
+    
+    times = [(instance.start, instance.duration) for instance in scope]
+    colors = [instance.color for instance in scope]
+    ax.broken_barh( times, (bar_y_position, bar_height), facecolors=colors)
+
+    # Some functions are called often and have a short runtime. Therefore
+    # only the average of runtime is written behind the last bar.
+    text_x_position = scope[-1].stop + text_space
+    text_y_position = bar_y_position + bar_height/2
+    text = '{} us'.format(scope.average)
+    ax.text(text_x_position, text_y_position, text,
+            horizontalalignment='left',
+            verticalalignment='center',
+            fontsize=8)
+
+    # plotting of scope is done. Move down to next scope in plot.
+    row_y_position += row_height
 
 
-    # The row is a little bit bigger than the bars which are inside. There is a
-    # horizontal space of 2 between every bar. The text is drawn behind the last
-    # bar with a padding of 5.
-    row_y_position = 0
-    row_height = 10
-    bar_height = 8
-    text_space = 5
-    # iterate over all functions and draw their bars.
-    for name, triplets in functions_sorted_by_start:
-        bar_y_position = row_y_position+(row_height-bar_height)/2
-        # a triplet of a function contains all calls. A call consists of start
-        # time, durations and color.
-        starts,durations,colors = zip(*triplets)
+ax.set_yticks( [k*row_height+row_height/2 for k in range(len(sorted_scopes))])
+ax.set_yticklabels( [scope.pretty for scope in sorted_scopes], fontsize=8)
+ax.grid(True)
+ax.set_xlabel('microseconds (us) since start')    
+plot.subplots_adjust(left=0.3, right=0.95, top=1-border_top_height/fig_height, bottom=border_bottom_height/fig_height)
 
-        # create a bar for every function
-        ax.broken_barh( list( zip(starts,durations)), (bar_y_position, bar_height),
-                        facecolors=colors)
+# save plot to files
+if args.output:
+    for output in args.output:
+        plot.savefig(output, dpi=100)
 
-        # Some functions are called often and have a short runtime. Therefore
-        # only runtime of the call with the longest runtime is written behind
-        # the last bar. 
-        bar_last_ending = 0
-        bar_max_duration = 0
-        for start,duration,color in triplets:
-            if start+duration > bar_last_ending:
-                bar_last_ending = start+duration
-            if duration > bar_max_duration:
-                bar_max_duration = duration
-
-        # plot the text behind the last bar.
-        text_x_position = bar_last_ending + text_space
-        text_y_position = bar_y_position + bar_height/2
-        text = '{} us'.format(bar_max_duration)
-        ax.text(text_x_position, text_y_position, text ,
-                            horizontalalignment='left',
-                            verticalalignment='center',
-                            fontsize=8)
-
-        # plotting function is done. Move down to next function in plot.
-        row_y_position += row_height
-
-    # draw the function name. The function pretty_name(...) shortens the string
-    # returned by C++'s __PRETTY_FUNCTION__.
-    names, triplets = zip(*functions_sorted_by_start)
-    pretty_names = map(pretty_name, names)
-    ax.set_yticks([k*row_height+row_height/2 for k in range(0,len(functions))])
-    ax.set_yticklabels(pretty_names, fontsize=8)
-
-    ax.grid(True)
-    ax.set_xlabel('microseconds (us) since start')    
-    plot.subplots_adjust(left=0.3, right=0.95, top=1-border_top_height/fig_height, bottom=border_bottom_height/fig_height)
-    return plot
-
-
-if __name__ == '__main__':
-    # parse arguments
-    # profiler-plot  profiler-plot [-h] [-s] [-d DIFF] [-o [OUTPUT [OUTPUT ...]]] -i INPUT
-    parser = argparse.ArgumentParser(prog="profiler-plot")
-    parser.add_argument("-s", "--show", action='store_true',
-                        help="Show Plot in a GUI.")
-    parser.add_argument("-d", "--diff",
-                        help="Overlay a second plot and show differences.")
-    parser.add_argument("-o", "--output", action='append', #nargs='*',
-                        help="Save plot to file. The file ending determinates the file type")
-    parser.add_argument("-i", "--input", required=True,
-                        help="Input File")
-    args = parser.parse_args()
-
-    # read input files
-    input_function_list = read_stat_file(args.input)
-
-    if args.diff:
-        diff_function_list = read_stat_file(args.diff)
-        input_function_list = merge_functions(input_function_list, diff_function_list)
-
-    # plot all functions
-    plot = plot_functions(input_function_list)
-
-    # save plot to files
-    if args.output:
-        for output in args.output:
-            plot.savefig(output, dpi=100)
-
-    # show plot
-    if args.show:
-        plot.show()
+# show plot
+if args.show:
+    plot.show()
