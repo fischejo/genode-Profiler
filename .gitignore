@@ -6,9 +6,10 @@
 .cproject
 .settings
 
-# MA folders
-test_template/
-run/template.run
-
 # emacs and projectile plugin
 .projectile
+
+# python
+__pycache__
+*.pyc
+
