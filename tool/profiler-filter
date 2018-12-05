@@ -1,6 +1,6 @@
 #/bin/bash
-
+VERSION="2.1"
 output=$(grep -oP '(?<=\\STATS\\).*(?=\\STATE\\)' ${1:-/dev/stdin} | sed 's/$/,/')
-echo "[" >> "${2:-/dev/stdout}"
+echo "{\"version\":\"$VERSION\", \"instances\": [" >> "${2:-/dev/stdout}"
 echo $output | rev | cut -c 2- | rev  >> "${2:-/dev/stdout}"
-echo "]" >> "${2:-/dev/stdout}"
+echo "]}" >> "${2:-/dev/stdout}"

@@ -8,7 +8,7 @@ files are created by `profiler-filter` and contain normal json.
 """
 __author__ = "Johannes Fischer"
 __license__ = "GNU Affero General Public License"
-__version__ = "1.0"
+__version__ = "2.1"
 __maintainer__ = "Johannes Fischer"
 __status__ = "Production"
 
@@ -180,16 +180,8 @@ class Scope(collections.Sequence):
 class Profile(collections.Mapping):
     __slots__ = ['_scopes']
 
-    def load(self, path):
-
-        """Load scopes form a profile file
-        :param path str: Path to the profile file
-        """
-        self._scopes = collections.defaultdict(list)
-
-        # parse json input
-        json_instances = json.load( open(path, 'r'))
-        for json_instance  in json_instances:
+    def _load_version_two_one(self, json_instances):
+        for json_instance in json_instances:
             name = json_instance['name']
             start = json_instance['start']
             stop = json_instance['stop']
@@ -199,7 +191,27 @@ class Profile(collections.Mapping):
         # wrap the list of Instance objects into a Scope
         for name,instances in self._scopes.items():
             self._scopes[name] = Scope(name, instances)
+    
+    def load(self, path):
+        
+        """Load scopes form a profile file
+        :param path str: Path to the profile file
+        """
+        self._scopes = collections.defaultdict(list)
 
+        # parse json input
+        json_profile = json.load( open(path, 'r'))
+        if "version" not in json_profile:
+            raise ValueError("Only .profile files with version higher or equal" \
+                             "2.1 are supported.")
+
+        version = json_profile["version"]
+        # load profile with version 2.1
+        if version  == "2.1":
+            json_instances = json_profile["instances"]
+            self._load_version_two_one(json_instances)
+
+            
     def __init__(self, scopes=[]):
         """Initialize a Profile Object
 
@@ -251,23 +263,29 @@ class Profile(collections.Mapping):
         return sorted(self._scopes.values(), reverse=True,
                       key=lambda scope:scope[0].start)
 
-
-    def save(self, path):
+    
+    def save(self, path, version="2.1"):
         """Saves this profile to a file
     
         :param path str: Path to output file.
-        """        
-        output = []
+        """
+
+        if version != "2.1":
+            raise ValueError("Only version 2.1 is possible for saving a .profile file.")
+        
+        json_instances = []
         for name, scope in self._scopes.items():
             for instance in scope:
-                output.append({
+                json_instances.append({
                     'name' : name,
                     'start': instance.start,
                     'stop': instance.stop,                        
                     'color': instance.color
                 })
+
+        json_profile = {"version": version, "instances": json_instances}
         with open(path, 'a') as f:
-            f.write(json.dumps(output, ensure_ascii=False))
+            f.write(json.dumps(json_profile, ensure_ascii=False))
 
 
     def mean(profiles, ingore_scope_disparity=False, ignore_color_disparity=False):
