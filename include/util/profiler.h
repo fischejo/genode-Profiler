@@ -31,7 +31,7 @@ class Profiler
   ~Profiler()
     {
       _stop = _timer.now_us();
-      Genode::log("\\STATS\\{",
+      Genode::raw("\\STATS\\{",
                   "\"name\": \"", _name, "\", ",
                   "\"color\": \"", _color, "\", ",                  
                   "\"start\": ", _start, ", ",
