@@ -2,7 +2,7 @@
 # global configuration
 set log_dir [run_dir]/
 set file_prefix [clock format [clock seconds] -format "%y-%m-%d-%H:%M:%S"]
-set tool_dir "${genode_dir}/../genode-Profiler/tool/"
+set tool_dir "${genode_dir}/repos/genode-Profiler/tool/"
 set show_plot true
 
 if { [have_include "power_on/qemu"]} {

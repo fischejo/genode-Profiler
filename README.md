@@ -31,12 +31,15 @@ sudo pip3 install matplotlib
 	 Genode::log("Hello World")
    }
    ```
+   *Take care, that the scope is closed again, before Genode is informed about
+   the end of the virtualization. Otherwise, the VM is terminated, before the
+   profile information are printed to stdout.*
 
 5. (Optional) If you want to use automatic logging, filtering and plotting of
    your profiling data whenever your application runs in Qemu, source
    `profiler.inc`.
    ```
-   source ${genode_dir}/../genode-Profiler/run/profiler.inc
+   source ${genode_dir}/repos/genode-Profiler/run/profiler.inc
    ```
    After running the run file, a GUI with the plot graph opens. You can disable
    this behaviour with `set show_plot false`.
@@ -45,12 +48,34 @@ sudo pip3 install matplotlib
 
 ## Genode Integration
 
-1. Clone this repository to the root directory of your Genode.
+1. Clone this repository to to `genode/repos/`
 
 2. Add this repository to the variable REPOSITORIES in `build.conf`.
    ```
-   REPOSITORIES += $(GENODE_DIR)/../genode-Profiler
+   REPOSITORIES += $(GENODE_DIR)/repos/genode-Profiler
    ```
+
+## Usage with real Hardware
+
+1. Log Serial Console of Genode Bootup
+```bash
+sudo screen -L -Logfile zybo.log /dev/ttyUSB1 115200
+```
+
+2. Extract profiler data from log file
+```bash
+./profiler-filter zybo.log zybo.profile
+```
+
+3. View plot of stat file
+```bash
+./profiler-plot --show --input zybo.profile
+```
+
+4. Export plot to .svg, .png and .pdf
+```bash
+./profiler-plot -i zybo.profile -o zybo.svg -o zybo.png -o zybo.pdf
+```
 
 
 ## Further documentation
