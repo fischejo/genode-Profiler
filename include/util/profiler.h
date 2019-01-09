@@ -25,12 +25,12 @@ class Profiler
    :
   _timer(timer),_name(name),_color(color)
   {
-    _start = timer.now_us();
+      _start = timer.elapsed_ms()*1000;
   }
 
   ~Profiler()
     {
-      _stop = _timer.now_us();
+      _stop = _timer.elapsed_ms()*1000;
       Genode::raw("\\STATS\\{",
                   "\"name\": \"", _name, "\", ",
                   "\"color\": \"", _color, "\", ",                  
