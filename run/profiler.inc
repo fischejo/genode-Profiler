@@ -1,8 +1,9 @@
 
+
 # global configuration
 set log_dir [run_dir]/
 set file_prefix [clock format [clock seconds] -format "%y-%m-%d-%H:%M:%S"]
-set tool_dir "${genode_dir}/repos/genode-Profiler/tool/"
+set tool_dir "./tool/profiler/"
 set show_plot true
 
 # only enable automatic recording of profiling data, when running in qemu.

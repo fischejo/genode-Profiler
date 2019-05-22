@@ -13,21 +13,28 @@ sudo pip3 install matplotlib
 
 ## Application Integration
 
-1. Include `<util/profiler.h>` in your Application
-2. Create a Timer Session and make it available in every function which should
-   be profiled.
-
+1. Add following libraries to your application:
+   ```bash
+   LIBS += profiler profiler_host_tools
+   ```
+   
+2. Include `<util/profiler.h>` in your Application
+2. Create a Timer Session and initialize the profiler:
+   ```
+   Timer::Connection timer;
+   PROFILER_INIT(&timer);
+   ```
 3. Every function, which should be profiled requires the macro
-   `PROFILE_FUNCTION(color, timer)` at the beginning. The attribute `color` is a
-   string like `blue`, and `timer` is the timer instance.
+   `PROFILE_FUNCTION(color)` at the beginning. The attribute `color` is a
+   string like `blue`.
 
 4. In order to profile a code area, put this code in a seperate Scope and
-   include `PROFILE_SCOPE(name, color, timer)` in the beginning of the
+   include `PROFILE_SCOPE(name, color)` in the beginning of the
    scope. The variable name is a string and represents the measurement in the
    plot. Example:
    ```C++
    {
-     PROFILE_SCOPE("simple-print", "yellow", _timer)
+     PROFILE_SCOPE("simple-print", "yellow")
 	 Genode::log("Hello World")
    }
    ```
