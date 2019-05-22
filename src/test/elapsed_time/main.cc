@@ -16,15 +16,17 @@ void Component::construct(Genode::Env &env)
 
 	using namespace Genode;
 	Timer::Connection timer(env);
-    for( int a = 0; a < 10000; a = a + 1 )
-    {
-      PROFILE_SCOPE("elapsed_time", "lightblue", timer);
-      {
-        PROFILE_SCOPE("measured_profile_function", "lightblue", timer);
-      }
-    }
+	PROFILER_INIT(&timer);
+	
+	for( int a = 0; a < 10000; a = a + 1 )
+	  {
+	    PROFILE_SCOPE("elapsed_time", "lightblue");
+	    {
+	      PROFILE_SCOPE("measured_profile_function", "lightblue");
+	    }
+	  }
 
-    // trigger genode to terminate qemu
-    log("the_end");        
-    Genode::sleep_forever();
+	// trigger genode to terminate qemu
+	log("the_end");        
+	Genode::sleep_forever();
 }

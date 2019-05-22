@@ -43,7 +43,7 @@ build_boot_image { core init timer elapsed_time }
 
 append qemu_args " -nographic "
 
-source ${genode_dir}/repos/genode-Profiler/run/profiler.inc
+source ${genode_dir}/repos/profiler/run/profiler.inc
 set show_plot true
 
 run_genode_until "the_end*" 30

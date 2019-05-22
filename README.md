@@ -15,7 +15,7 @@ sudo pip3 install matplotlib
 
 1. Add following libraries to your application:
    ```bash
-   LIBS += profiler profiler_host_tools
+   LIBS += profiler
    ```
    
 2. Include `<util/profiler.h>` in your Application
